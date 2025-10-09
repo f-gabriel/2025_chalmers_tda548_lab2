@@ -7,11 +7,9 @@ import random
 class Game:
     """ Create a game with a given size of cannon (length of sides) and projectiles (radius) """
     def __init__(self, cannonSize, ballSize):
-        # TODO: "pass" means the constructor does nothing. Clearly it should be doing something.
-        # HINT: This constructor needs to create two players according to the rules specified in the assignment text
         self.cannonSize = cannonSize
         self.ballSize = ballSize
-        self.wind = 0 ### kommer inte behövas här
+        self.wind = 0 ### kommer nog inte behövas här
         self.player0 = Player(self, 0, 'blue', -90, False)
         self.player1 = Player(self, 1, 'red', 90, True)
         self.currentPlayerNumber = 0
@@ -61,8 +59,6 @@ class Game:
 
 """ Models a player """
 class Player:
-   #TODO: You need to create a constructor here. 
-   #HINT: It should probably take the Game that creates it as parameter and some additional properties that differ between players (like firing-direction, position and color)
     def __init__(self, game, player_nr, color, x_pos, isReversed):
         self.nr = player_nr
         self.game = game
@@ -76,9 +72,6 @@ class Player:
 
     """ Create and return a projectile starting at the centre of this players cannon. Replaces any previous projectile for this player. """
     def fire(self, angle, velocity):
-        # The projectile should start in the middle of the cannon of the firing player
-        # Some are hard-coded, like the boundaries for x-position, others can be found in Game or Player
-
         self.angle = angle
         self.velocity = velocity
         yPos = Game.getCannonSize(self.game) / 2
@@ -92,11 +85,8 @@ class Player:
 
     """ Gives the x-distance from this players cannon to a projectile. If the cannon and the projectile touch (assuming the projectile is on the ground and factoring in both cannon and projectile size) this method should return 0"""
     def projectileDistance(self, proj):
-        # HINT: both self (a Player) and proj (a Projectile) have getX()-methods.
         # HINT: This method should give a negative value if the projectile missed to the left and positive if it missed to the right.
-        # The distance should be how far the projectile and cannon are from touching, not the distance between their centers.
-        # You probably need to use getCannonSize and getBallSize from Game to compensate for the size of cannons/cannonballs
-
+        
         distance = Projectile.getX(proj) - self.getX()
         distance -= (Game.getBallSize(self.game) + Game.getCannonSize(self.game)) / 2
 

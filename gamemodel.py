@@ -12,8 +12,8 @@ class Game:
         self.cannonSize = cannonSize
         self.ballSize = ballSize
         self.wind = 0
-        self.player0 = Player(self, 0, self.wind, 'blue', -90, self.cannonSize, self.ballSize, 1)
-        self.player1 = Player(self, 1, self.wind, 'red', 90, self.cannonSize, self.ballSize, -1)
+        self.player0 = Player(self, 0, 'blue', -90, 1)
+        self.player1 = Player(self, 1, 'red', 90, -1)
         self.currentPlayerNumber = 0
 
 
@@ -36,7 +36,7 @@ class Game:
 
     """ The opponent of the current player """
     def getOtherPlayer(self):
-        return self.getPlayers()[1 - self.currentPlayerNumber] ### ger 1 om PN == 0 och 0 om PN == 1
+        return self.getPlayers()[1 - self.currentPlayerNumber] ### ger 1 om PlayerNr == 0 och 0 om PlayerNr == 1
     
     """ The number (0 or 1) of the current player. This should be the position of the current player in getPlayers(). """
     def getCurrentPlayerNumber(self):
@@ -48,7 +48,7 @@ class Game:
 
     """ Set the current wind speed, only used for testing """
     def setCurrentWind(self, wind):
-        return wind
+        self.wind = wind
     
     def getCurrentWind(self):
         return self.wind
@@ -63,11 +63,9 @@ class Game:
 class Player:
    #TODO: You need to create a constructor here. 
    #HINT: It should probably take the Game that creates it as parameter and some additional properties that differ between players (like firing-direction, position and color)
-    def __init__(self, game, player_nr, wind, color, x_pos, cannonSize, ballSize, direction):
-        self.cannonSize = cannonSize
-        self.ballSize = ballSize
+    def __init__(self, game, player_nr, color, x_pos, direction):
+        
         self.nr = player_nr
-        self.wind = wind
         self.game = game
         self.color = color
         self.x_pos = x_pos
@@ -80,14 +78,13 @@ class Player:
         # The projectile should start in the middle of the cannon of the firing player
         # Some are hard-coded, like the boundaries for x-position, others can be found in Game or Player
     
-        midCannon = self.cannonSize / 2
+        midCannon = Game.getCannonSize(self.game) / 2
         yPos = midCannon
-        xLower = -90 - self.cannonSize
+        xLower = -90 - Game.getCannonSize(self.game)
         xUpper = -xLower
-        self.proj = Projectile(angle, velocity, self.wind, self.x_pos, yPos, xLower, xUpper)
+        self.proj = Projectile(angle, velocity, Game.getCurrentWind(self.game), self.x_pos, yPos, xLower, xUpper)
 
-
-        return proj
+        return self.proj
 
     """ Gives the x-distance from this players cannon to a projectile. If the cannon and the projectile touch (assuming the projectile is on the ground and factoring in both cannon and projectile size) this method should return 0"""
     def projectileDistance(self, proj):
@@ -95,8 +92,11 @@ class Player:
         # HINT: This method should give a negative value if the projectile missed to the left and positive if it missed to the right.
         # The distance should be how far the projectile and cannon are from touching, not the distance between their centers.
         # You probably need to use getCannonSize and getBallSize from Game to compensate for the size of cannons/cannonballs
- 
-        return 0 #TODO: this is a dummy value.
+
+        distance = self.getX() - Projectile.getX(proj)
+        distance -= (Game.getBallSize(self.game) + Game.getCannonSize(self.game)) / 2
+
+        return self.direction * distance
 
     """ The current score of this player """
     def getScore(self):
@@ -116,8 +116,8 @@ class Player:
     
     """ The angle and velocity of the last projectile this player fired, initially (45, 40) """
     def getAim(self):
-        self.proj.
-        return (self.proj.)
+        
+        return (self.proj.angle, self.proj.velocity)
 
 
 
@@ -140,6 +140,9 @@ class Projectile:
         self.xvel = velocity*cos(theta)
         self.yvel = velocity*sin(theta)
         self.wind = wind
+
+        self.angle = angle
+        self.velocity = velocity
 
 
     """ 

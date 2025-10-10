@@ -1,7 +1,14 @@
 from math import sin,cos,radians
 import random
 
-#TODO: Deal with all TODOs in this file and also remove the TODO and HINT comments.
+### Fredriks kommentarer = '###'
+### Kolla projectileDistance() när de fixat buggen i test.py
+    ### (Handledarna har sagt att vi ska vänta med att fixa problemet.)
+### Game ska ha 5 attribut
+### Behöver Projectile ha attribut wind? 
+### labben har en rätt förenklad definition för vad en träff innebär 
+    ### (om kulan går igenom kanonen, men inte träffar marken i kanonen, räknas det inte som en träff)
+
 
 """ This is the model of the game"""
 class Game:
@@ -9,12 +16,13 @@ class Game:
     def __init__(self, cannonSize, ballSize):
         self.cannonSize = cannonSize
         self.ballSize = ballSize
-        self.wind = 0 ### kommer nog inte behövas här
-        self.player0 = Player(self, 0, 'blue', -90, False)
-        self.player1 = Player(self, 1, 'red', 90, True)
         self.currentPlayerNumber = 0
 
+        self.player0 = Player(self, 0, 'blue', -90, False)
+        self.player1 = Player(self, 1, 'red', 90, True)
 
+        self.newRound() ### kanske ska kallas från graphicsmain.GameFraphics.play istället.
+        
 
     """ A list containing both players """
     def getPlayers(self):
@@ -34,7 +42,8 @@ class Game:
 
     """ The opponent of the current player """
     def getOtherPlayer(self):
-        return self.getPlayers()[1 - self.currentPlayerNumber] ### ger 1 om PlayerNr == 0 och 0 om PlayerNr == 1
+        otherPlayerNumber = 1 - self.currentPlayerNumber ### ger motsatta nr till currentPlayerNr
+        return self.getPlayers()[otherPlayerNumber] 
     
     """ The number (0 or 1) of the current player. This should be the position of the current player in getPlayers(). """
     def getCurrentPlayerNumber(self):
@@ -54,17 +63,20 @@ class Game:
     """ Start a new round with a random wind value (-10 to +10) """
     def newRound(self):
         self.wind = random.random() * 20 - 10
-        self.nextPlayer()
+
+        ### self.nextPlayer()
+        ### behövs ej. graphicsmain.GameFraphics.play kallar på nextPlayer.
 
 
 """ Models a player """
 class Player:
     def __init__(self, game, player_nr, color, x_pos, isReversed):
-        self.nr = player_nr
         self.game = game
+        self.nr = player_nr
         self.color = color
         self.x_pos = x_pos
         self.isReversed = isReversed
+        
         self.score = 0
         self.angle = 0
         self.velocity = 0
@@ -74,30 +86,35 @@ class Player:
     def fire(self, angle, velocity):
         self.angle = angle
         self.velocity = velocity
-        yPos = Game.getCannonSize(self.game) / 2
-
+        wind = self.game.getCurrentWind()
+        yPos = self.game.getCannonSize() / 2
+        
         if self.isReversed:
             self.angle = 180 - self.angle
 
-        proj = Projectile(self.angle, self.velocity, Game.getCurrentWind(self.game), self.x_pos, yPos, -110, 110)
+        proj = Projectile(self.angle, self.velocity, wind, self.x_pos, yPos, -110, 110)
 
         return proj
 
     """ Gives the x-distance from this players cannon to a projectile. If the cannon and the projectile touch (assuming the projectile is on the ground and factoring in both cannon and projectile size) this method should return 0"""
     def projectileDistance(self, proj):
-        # HINT: This method should give a negative value if the projectile missed to the left and positive if it missed to the right.
-        
-        distance = Projectile.getX(proj) - self.getX()
-        distance -= (Game.getBallSize(self.game) + Game.getCannonSize(self.game)) / 2
+        ### Antagligen ett floating point error i test?
+        ### Är ballsize = radie eller diameter?
+        ### Metoden kan nog snyggas till lite eftersom vi har cannonsEdge
 
-        if distance == 0:
-            self.increaseScore()
+        cannonsEdge = self.game.getCannonSize() /2
+        distance = Projectile.getX(proj) - self.getX()
+        distance -= (self.game.getBallSize() + self.game.getCannonSize()) / 2
+        
+        if (self.getX() - cannonsEdge) <= Projectile.getX(proj) <= (self.getX() + cannonsEdge): ### om proj är inuti cannon.
+            distance = 0
 
         return distance
 
     """ The current score of this player """
     def getScore(self):
         return self.score
+    
     """ Increase the score of this player by 1."""
     def increaseScore(self):
         self.score += 1
@@ -112,13 +129,12 @@ class Player:
     
     """ The angle and velocity of the last projectile this player fired, initially (45, 40) """
     def getAim(self):
-        
         return (self.angle, self.velocity)
 
 
 
 """ Models a projectile (a cannonball, but could be used more generally) """
-class Projectile:
+class Projectile: ### Är i stort sett oförändrad. Har kanske lagt till self.wind, men tror att den var där från början.
     """
         Constructor parameters:
         angle and velocity: the initial angle and velocity of the projectile 

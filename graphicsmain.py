@@ -1,6 +1,9 @@
 from gamemodel import *
 from graphics import *
 
+### Fredriks kommentarer = '###'
+### Är ballsize radie eller diameter?
+### Explossion ej implementerad.
 
 class GameGraphics:
     def __init__(self, game):
@@ -11,36 +14,40 @@ class GameGraphics:
         self.win.setCoords(-110, -10, 110, 155)
         
         # draw the terrain
-        self.draw_terrain = Line(Point(-110, 0), Point(110,0))
+        p1 = Point(-110, 0)
+        p2 = Point(110,0)
+        self.draw_terrain = Line(p1, p2)
         self.draw_terrain.draw(self.win)
 
         self.draw_cannons = [self.drawCanon(0), self.drawCanon(1)]
         self.draw_scores  = [self.drawScore(0), self.drawScore(1)]
-        self.draw_projs   = [None, None]
+        self.draw_projs   = [None, None] ### sparar de ritade projektilerna
 
     def drawCanon(self,playerNr):
-        x_pos = Game.getPlayers(self.game)[playerNr].x_pos
-        size = Game.getCannonSize(self.game)
+        x_pos = self.game.getPlayers()[playerNr].x_pos
+        size = self.game.getCannonSize()
         p1 = Point(x_pos - size / 2, size)
         p2 = Point(x_pos + size / 2, 0)
 
+        ### Ritar en kanon från punkt 1 till 2 och färgar den.
         draw_cannon = Rectangle(p1, p2)
-        draw_cannon.setFill(Game.getPlayers(self.game)[playerNr].color)
-        draw_cannon.setOutline(Game.getPlayers(self.game)[playerNr].color)
+        draw_cannon.setFill(self.game.getPlayers()[playerNr].color)
+        draw_cannon.setOutline(self.game.getPlayers()[playerNr].color)
         draw_cannon.draw(self.win)
        
         return draw_cannon
 
+    ### skriver poängantalet under varje spelare
     def drawScore(self,playerNr):
-        # draw the score
-        # TODO: draw the text "Score: X", where X is the number of points
-        # for player number playerNr. The text should be placed under
-        # the corresponding cannon. After the drawing,
-        # return the text object.
-        
-        
-        return None
+        msg = f'Score: {self.game.getPlayers()[playerNr].score}'
+        x_pos = self.game.getPlayers()[playerNr].x_pos
+        y_pos = -5  ### Ett godtyckligt tal (i mitten av botten av window och cannon)
+        draw_score = Text(Point(x_pos, y_pos), msg)
 
+        draw_score.draw(self.win)
+        return draw_score
+
+    ### Ritar/animerar kanonkulan
     def fire(self, angle, vel):
         player = self.game.getCurrentPlayer()
         proj = player.fire(angle, vel)
@@ -48,12 +55,17 @@ class GameGraphics:
         circle_X = proj.getX()
         circle_Y = proj.getY()
 
-        # TODO: If the circle for the projectile for the current player
-        # is not None, undraw it!
+        if  not self.draw_projs[player.nr] == None:
+            self.draw_projs[player.nr].undraw() 
 
-        # draw the projectile (ball/circle)
-        # TODO: Create and draw a new circle with the coordinates of
-        # the projectile.
+
+        p = Point(circle_X, circle_Y)
+        size = self.game.getBallSize() ### / 2  :Är ballsize = radie eller diameter?
+        circle = Circle(p, size)
+        
+        circle.setFill(player.color)
+        circle.setOutline(player.color)
+        circle.draw(self.win)
 
         while proj.isMoving():
             proj.update(1/50)
@@ -65,20 +77,22 @@ class GameGraphics:
             circle_Y = proj.getY()
 
             update(50)
+        
+        self.draw_projs[player.nr] = circle
 
         return proj
 
     def updateScore(self,playerNr):
-        # update the score on the screen
-        # TODO: undraw the old text, create and draw a new text
-        pass
+        self.draw_scores[playerNr].undraw()
+        self.drawScore(playerNr)
+        
 
     def play(self):
         while True:
             player = self.game.getCurrentPlayer()
             oldAngle,oldVel = player.getAim()
             wind = self.game.getCurrentWind()
-
+            
             # InputDialog(self, angle, vel, wind) is a class in gamegraphics
             inp = InputDialog(oldAngle,oldVel,wind)
             # interact(self) is a function inside InputDialog. It runs a loop until the user presses either the quit or fire button

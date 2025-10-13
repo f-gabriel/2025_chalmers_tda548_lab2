@@ -1,11 +1,7 @@
 from math import sin,cos,radians
 import random
 
-### Fredriks kommentarer = '###'
-### Kolla projectileDistance() när de fixat buggen i test.py
-    ### (Handledarna har sagt att vi ska vänta med att fixa problemet.)
-### Game ska ha 5 attribut
-### Behöver Projectile ha attribut wind? 
+### Fredriks kommentarer = '###' 
 ### labben har en rätt förenklad definition för vad en träff innebär 
     ### (om kulan går igenom kanonen, men inte träffar marken i kanonen, räknas det inte som en träff)
 
@@ -16,17 +12,17 @@ class Game:
     def __init__(self, cannonSize, ballSize):
         self.cannonSize = cannonSize
         self.ballSize = ballSize
+        self.players = [
+            Player(self, 0, 'blue', -90, False), 
+            Player(self, 1, 'red', 90, True)
+            ]
         self.currentPlayerNumber = 0
-
-        self.player0 = Player(self, 0, 'blue', -90, False)
-        self.player1 = Player(self, 1, 'red', 90, True)
-
-        self.newRound() ### kanske ska kallas från graphicsmain.GameFraphics.play istället.
+        self.newRound() 
         
 
     """ A list containing both players """
     def getPlayers(self):
-        return [self.player0, self.player1] 
+        return self.players
 
     """ The height/width of the cannon """
     def getCannonSize(self):
@@ -42,7 +38,7 @@ class Game:
 
     """ The opponent of the current player """
     def getOtherPlayer(self):
-        otherPlayerNumber = 1 - self.currentPlayerNumber ### ger motsatta nr till currentPlayerNr
+        otherPlayerNumber = 1 - self.currentPlayerNumber
         return self.getPlayers()[otherPlayerNumber] 
     
     """ The number (0 or 1) of the current player. This should be the position of the current player in getPlayers(). """
@@ -63,9 +59,6 @@ class Game:
     """ Start a new round with a random wind value (-10 to +10) """
     def newRound(self):
         self.wind = random.random() * 20 - 10
-
-        ### self.nextPlayer()
-        ### behövs ej. graphicsmain.GameFraphics.play kallar på nextPlayer.
 
 
 """ Models a player """
@@ -90,23 +83,25 @@ class Player:
         yPos = self.game.getCannonSize() / 2
         
         if self.isReversed:
-            self.angle = 180 - self.angle
+            angle = 180 - angle
 
-        proj = Projectile(self.angle, self.velocity, wind, self.x_pos, yPos, -110, 110)
+        proj = Projectile(angle, velocity, wind, self.x_pos, yPos, -110, 110)
 
         return proj
 
     """ Gives the x-distance from this players cannon to a projectile. If the cannon and the projectile touch (assuming the projectile is on the ground and factoring in both cannon and projectile size) this method should return 0"""
     def projectileDistance(self, proj):
-        ### Antagligen ett floating point error i test?
-        ### Är ballsize = radie eller diameter?
-        ### Metoden kan nog snyggas till lite eftersom vi har cannonsEdge
-
-        cannonsEdge = self.game.getCannonSize() /2
-        distance = Projectile.getX(proj) - self.getX()
-        distance -= (self.game.getBallSize() + self.game.getCannonSize()) / 2
+        cannonsEdge = self.game.getCannonSize() / 2
+        ballSize = self.game.getBallSize()
+        distance = proj.getX() - self.getX()
+        distance -= (distance / abs(distance)) * (ballSize + cannonsEdge)
         
-        if (self.getX() - cannonsEdge) <= Projectile.getX(proj) <= (self.getX() + cannonsEdge): ### om proj är inuti cannon.
+        ### om proj är inuti cannon.
+        if (
+            self.getX() - (cannonsEdge + ballSize) 
+            <= proj.getX() 
+            <= (self.getX() + (cannonsEdge + ballSize))
+            ): 
             distance = 0
 
         return distance
@@ -134,7 +129,7 @@ class Player:
 
 
 """ Models a projectile (a cannonball, but could be used more generally) """
-class Projectile: ### Är i stort sett oförändrad. Har kanske lagt till self.wind, men tror att den var där från början.
+class Projectile: 
     """
         Constructor parameters:
         angle and velocity: the initial angle and velocity of the projectile 

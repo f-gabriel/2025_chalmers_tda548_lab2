@@ -2,7 +2,6 @@ from gamemodel import *
 from graphics import *
 
 ### Fredriks kommentarer = '###'
-### Är ballsize radie eller diameter?
 ### Explossion ej implementerad.
 
 class GameGraphics:
@@ -23,13 +22,14 @@ class GameGraphics:
         self.draw_scores  = [self.drawScore(0), self.drawScore(1)]
         self.draw_projs   = [None, None] ### sparar de ritade projektilerna
 
+    ### Ritar en kanon från punkt 1 till 2 (p1 & p2) genom Rectangle och färgar den.
     def drawCanon(self,playerNr):
         x_pos = self.game.getPlayers()[playerNr].x_pos
         size = self.game.getCannonSize()
         p1 = Point(x_pos - size / 2, size)
         p2 = Point(x_pos + size / 2, 0)
 
-        ### Ritar en kanon från punkt 1 till 2 och färgar den.
+        
         draw_cannon = Rectangle(p1, p2)
         draw_cannon.setFill(self.game.getPlayers()[playerNr].color)
         draw_cannon.setOutline(self.game.getPlayers()[playerNr].color)
@@ -41,7 +41,7 @@ class GameGraphics:
     def drawScore(self,playerNr):
         msg = f'Score: {self.game.getPlayers()[playerNr].score}'
         x_pos = self.game.getPlayers()[playerNr].x_pos
-        y_pos = -5  ### Ett godtyckligt tal (i mitten av botten av window och cannon)
+        y_pos = -5  ### Ett godtyckligt tal (mellan botten av window och cannon)
         draw_score = Text(Point(x_pos, y_pos), msg)
 
         draw_score.draw(self.win)
@@ -58,9 +58,8 @@ class GameGraphics:
         if  not self.draw_projs[player.nr] == None:
             self.draw_projs[player.nr].undraw() 
 
-
         p = Point(circle_X, circle_Y)
-        size = self.game.getBallSize() ### / 2  :Är ballsize = radie eller diameter?
+        size = self.game.getBallSize() 
         circle = Circle(p, size)
         
         circle.setFill(player.color)
@@ -86,6 +85,22 @@ class GameGraphics:
         self.draw_scores[playerNr].undraw()
         self.drawScore(playerNr)
         
+    ### Animerar en explosion (kallas vid träff av kanonen)
+    def explode(self, other, player):
+        target = other.getX()
+        color = player.getColor()
+        radius = self.game.getBallSize()
+        maxExplosion = self.game.getCannonSize() * 2
+
+        while radius <= maxExplosion:
+            explCircle = Circle(Point(target, 0), radius)
+            explCircle.setFill(color)
+            explCircle.setOutline(color)
+            explCircle.draw(self.win)
+            radius += 1
+
+            update(50)
+            explCircle.undraw()
 
     def play(self):
         while True:
@@ -110,6 +125,7 @@ class GameGraphics:
             if distance == 0.0:
                 player.increaseScore()
                 self.updateScore(self.game.getCurrentPlayerNumber())
+                self.explode(other, player)
                 self.game.newRound()
 
             self.game.nextPlayer()

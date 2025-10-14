@@ -1,5 +1,6 @@
 from gamemodel import *
 from graphics import *
+ 
 
 
 class GameGraphics:
@@ -11,27 +12,41 @@ class GameGraphics:
         self.win.setCoords(-110, -10, 110, 155)
         
         # draw the terrain
-        # TODO: Draw a line from (-110,0) to (110,0)
+        p1 = Point(-110, 0)
+        p2 = Point(110,0)
+        self.draw_terrain = Line(p1, p2)
+        self.draw_terrain.draw(self.win)
 
         self.draw_cannons = [self.drawCanon(0), self.drawCanon(1)]
         self.draw_scores  = [self.drawScore(0), self.drawScore(1)]
-        self.draw_projs   = [None, None]
+        self.draw_projs   = [None, None] ### sparar de ritade projektilerna
 
+    ### Ritar en kanon från punkt 1 till 2 (dvs p1 & p2) genom Rectangle-class och färgar den.
     def drawCanon(self,playerNr):
-        # draw the cannon
-        # TODO: draw a square with the size of the cannon with the color
-        # and the position of the player with number playerNr.
-        # After the drawing, return the rectangle object.
-        return None
+        x_pos = self.game.getPlayers()[playerNr].x_pos
+        size = self.game.getCannonSize()
+        p1 = Point(x_pos - size / 2, size)
+        p2 = Point(x_pos + size / 2, 0)
 
+        
+        draw_cannon = Rectangle(p1, p2)
+        draw_cannon.setFill(self.game.getPlayers()[playerNr].color)
+        draw_cannon.setOutline(self.game.getPlayers()[playerNr].color)
+        draw_cannon.draw(self.win)
+       
+        return draw_cannon
+
+    ### skriver poängantalet under varje spelare
     def drawScore(self,playerNr):
-        # draw the score
-        # TODO: draw the text "Score: X", where X is the number of points
-        # for player number playerNr. The text should be placed under
-        # the corresponding cannon. After the drawing,
-        # return the text object.
-        return None
+        msg = f'Score: {self.game.getPlayers()[playerNr].score}'
+        x_pos = self.game.getPlayers()[playerNr].x_pos
+        y_pos = -5  ### Ett godtyckligt tal (mellan botten av window och cannon)
+        draw_score = Text(Point(x_pos, y_pos), msg)
 
+        draw_score.draw(self.win)
+        return draw_score
+
+    ### Ritar/animerar kanonkulan
     def fire(self, angle, vel):
         player = self.game.getCurrentPlayer()
         proj = player.fire(angle, vel)
@@ -39,12 +54,16 @@ class GameGraphics:
         circle_X = proj.getX()
         circle_Y = proj.getY()
 
-        # TODO: If the circle for the projectile for the current player
-        # is not None, undraw it!
+        if  not self.draw_projs[player.nr] == None:
+            self.draw_projs[player.nr].undraw() 
 
-        # draw the projectile (ball/circle)
-        # TODO: Create and draw a new circle with the coordinates of
-        # the projectile.
+        p = Point(circle_X, circle_Y)
+        size = self.game.getBallSize() 
+        circle = Circle(p, size)
+        
+        circle.setFill(player.color)
+        circle.setOutline(player.color)
+        circle.draw(self.win)
 
         while proj.isMoving():
             proj.update(1/50)
@@ -56,20 +75,52 @@ class GameGraphics:
             circle_Y = proj.getY()
 
             update(50)
+        
+        self.draw_projs[player.nr] = circle
 
         return proj
 
     def updateScore(self,playerNr):
-        # update the score on the screen
-        # TODO: undraw the old text, create and draw a new text
-        pass
+        self.draw_scores[playerNr].undraw()
+        self.drawScore(playerNr)
+        
+    ### Animerar en explosion (kallas vid träff av kanonen)
+    def explode(self, other, player):
+        target = other.getX()
+        color = player.getColor()
+        radius = self.game.getBallSize()
+        maxExplosion = self.game.getCannonSize() * 2
+
+        while radius <= maxExplosion:
+            explCircle = Circle(Point(target, 0), radius)
+            explCircle.setFill(color)
+            explCircle.setOutline(color)
+            explCircle.draw(self.win)
+            radius += 1
+
+            update(50)
+            explCircle.undraw()
+
+    def congratulations(self, player):
+        
+        win = GraphWin("Winner", 600, 400, True)
+        Text(Point(1,2), "Winner")
+        Text(Point(250,200), f'Congratulations {player.getColor()} player!').draw(win).setFill(player.getColor())
+        win.getMouse()
+        self.game.newMatch()
+        self.updateScore(0)
+        self.updateScore(1)
+        win.close()
+        
+        
+
 
     def play(self):
         while True:
             player = self.game.getCurrentPlayer()
             oldAngle,oldVel = player.getAim()
             wind = self.game.getCurrentWind()
-
+            
             # InputDialog(self, angle, vel, wind) is a class in gamegraphics
             inp = InputDialog(oldAngle,oldVel,wind)
             # interact(self) is a function inside InputDialog. It runs a loop until the user presses either the quit or fire button
@@ -79,15 +130,24 @@ class GameGraphics:
             elif inp.interact() == "Quit":
                 exit()
             
+
             player = self.game.getCurrentPlayer()
             other = self.game.getOtherPlayer()
             proj = self.fire(angle, vel)
             distance = other.projectileDistance(proj)
 
+            
             if distance == 0.0:
                 player.increaseScore()
                 self.updateScore(self.game.getCurrentPlayerNumber())
+                self.explode(other, player)
                 self.game.newRound()
+
+
+            ### leder till congratulations-method när en spelare vinner
+            if player.getScore() == 1:
+                self.congratulations(player)
+            
 
             self.game.nextPlayer()
 
@@ -167,3 +227,4 @@ class Button:
 
 
 GameGraphics(Game(11,3)).play()
+

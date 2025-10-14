@@ -1,7 +1,14 @@
 from gamemodel import *
 from graphics import *
- 
 
+### Att göra: 
+   ### omplacera metoder från congartulations() till play()
+   ### lägg till text för att säga hur många poäng som behövs för att vinna
+       ### ex. 'best of three'
+       ### kan läggas i startfönstret, men är nog lättare att lägga i en ny metod, liknande drawScore()
+   ### kommentera all egen kod
+
+### We've added our own code for a win-condition including a message to the winner and resetting the score for the current game.
 
 class GameGraphics:
     def __init__(self, game):
@@ -101,14 +108,15 @@ class GameGraphics:
             update(50)
             explCircle.undraw()
 
+    ### En ny metod som skriver ett meddelande när en spelare vinner
     def congratulations(self, player):
         
         win = GraphWin("Winner", 600, 400, True)
-        Text(Point(1,2), "Winner")
+        Text(Point(1,2), "Winner") ### Tror inte att denna syns i fönstret
         Text(Point(250,200), f'Congratulations {player.getColor()} player!').draw(win).setFill(player.getColor())
         win.getMouse()
-        self.game.newMatch()
-        self.updateScore(0)
+        self.game.newMatch() ### flytta till play
+        self.updateScore(0) 
         self.updateScore(1)
         win.close()
         
@@ -147,6 +155,7 @@ class GameGraphics:
             ### leder till congratulations-method när en spelare vinner
             if player.getScore() == 1:
                 self.congratulations(player)
+                ### sätt in newMatch etc här och undraw kanonkulan
             
 
             self.game.nextPlayer()

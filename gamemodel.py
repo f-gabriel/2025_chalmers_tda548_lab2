@@ -1,7 +1,9 @@
 from math import sin,cos,radians
 import random
 
-### Does Game.__init__ look correct 
+### Döp om newMatch() till newGame()
+
+### We've added Game.newMatch and Player.resetScore() for our own implimentation of a win-condition. 
 
 """ This is the model of the game"""
 class Game:
@@ -56,12 +58,13 @@ class Game:
     """ Start a new round with a random wind value (-10 to +10) """
     def newRound(self):
         self.wind = random.random() * 20 - 10
-    
+
+    ### Method is called from graphicsMain when a player has won a game calls, and then calls Player.resetScore() for both players 
     def newMatch(self):
         self.getCurrentPlayer().resetScore()
         
         self.getOtherPlayer().resetScore()
-    print(newMatch)
+    print(newMatch) ### ta bort
 
 """ Models a player """
 class Player:
@@ -127,7 +130,8 @@ class Player:
     """ The angle and velocity of the last projectile this player fired, initially (45, 40) """
     def getAim(self):
         return (self.angle, self.velocity)
-    
+
+    ### is called from Game.newGame() when the scores need to be reset before a new game
     def resetScore(self):
         self.score = 0
 
@@ -189,3 +193,4 @@ class Projectile:
     """ The current y-position (height) of the projectile". Should never be below 0. """
     def getY(self):
         return self.yPos
+

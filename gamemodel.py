@@ -1,10 +1,9 @@
 from math import sin,cos,radians
 import random
 
-### Döp om newMatch() till newGame()
 ### är det ok att ha objekt.attribut, eller objekt.getAttributA.attribubtB, eller ska det vara objekt.getAttributA().getattribubtB()
-### fråga om getDistance()
-### We've added Game.newMatch and Player.resetScore() for our own implimentation of a win-condition. 
+
+### We've added Game.newGame() and Player.resetScore() for our own implimentation of a win-condition. 
 
 """ This is the model of the game"""
 class Game:
@@ -61,11 +60,9 @@ class Game:
         self.wind = random.random() * 20 - 10
 
     ### Method is called from graphicsMain when a player has won a game calls, and then calls Player.resetScore() for both players 
-    def newMatch(self):
+    def newGame(self):
         self.getCurrentPlayer().resetScore()
-        
         self.getOtherPlayer().resetScore()
-    print(newMatch) ### ta bort
 
 """ Models a player """
 class Player:
@@ -77,8 +74,8 @@ class Player:
         self.isReversed = isReversed
         
         self.score = 0
-        self.angle = 0
-        self.velocity = 0
+        self.angle = 45
+        self.velocity = 40
         
 
     """ Create and return a projectile starting at the centre of this players cannon. Replaces any previous projectile for this player. """
@@ -123,7 +120,11 @@ class Player:
     """ Returns the color of this player (a string)"""
     def getColor(self):
         return self.color
-        
+    
+    ### returns number of player
+    def getNumber(self):
+        return self.nr
+
     """ The x-position of the centre of this players cannon """
     def getX(self):
         return self.x_pos

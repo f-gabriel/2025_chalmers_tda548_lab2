@@ -2,11 +2,11 @@ from gamemodel import *
 from graphics import *
 
 ### Att göra: 
-   ### omplacera metoder från congartulations() till play()
+   
    ### lägg till text för att säga hur många poäng som behövs för att vinna
        ### ex. 'best of three'
        ### kan läggas i startfönstret, men är nog lättare att lägga i en ny metod, liknande drawScore()
-   ### kommentera all egen kod
+   
 
 ### We've added our own code for a win-condition including a message to the winner and resetting the score for the current game.
 
@@ -30,26 +30,24 @@ class GameGraphics:
 
     ### Ritar en kanon från punkt 1 till 2 (dvs p1 & p2) genom Rectangle-class och färgar den.
     def drawCanon(self,playerNr):
-        x_pos = self.game.getPlayers()[playerNr].x_pos ### getX()
+        x_pos = self.game.getPlayers()[playerNr].getX() 
         size = self.game.getCannonSize()
         p1 = Point(x_pos - size / 2, size)
         p2 = Point(x_pos + size / 2, 0)
 
-        
         draw_cannon = Rectangle(p1, p2)
-        draw_cannon.setFill(self.game.getPlayers()[playerNr].color) ### getColor()
-        draw_cannon.setOutline(self.game.getPlayers()[playerNr].color) ### getColor()
+        draw_cannon.setFill(self.game.getPlayers()[playerNr].getColor()) 
+        draw_cannon.setOutline(self.game.getPlayers()[playerNr].getColor()) 
         draw_cannon.draw(self.win)
        
         return draw_cannon
 
     ### skriver poängantalet under varje spelare
     def drawScore(self,playerNr):
-        msg = f'Score: {self.game.getPlayers()[playerNr].score}'  ### getScore()
-        x_pos = self.game.getPlayers()[playerNr].x_pos  ### getColor()
+        msg = f'Score: {self.game.getPlayers()[playerNr].getScore()}'  ### getScore()
+        x_pos = self.game.getPlayers()[playerNr].getX()  ### getColor()
         y_pos = -5  ### Ett godtyckligt tal (mellan botten av window och cannon)
         draw_score = Text(Point(x_pos, y_pos), msg)
-
         draw_score.draw(self.win)
         return draw_score
 
@@ -61,15 +59,14 @@ class GameGraphics:
         circle_X = proj.getX()
         circle_Y = proj.getY()
 
-        if  not self.draw_projs[player.nr] == None:
-            self.draw_projs[player.nr].undraw() 
+        if  not self.draw_projs[player.getNumber()] == None:
+            self.draw_projs[player.getNumber()].undraw() 
 
         p = Point(circle_X, circle_Y)
         size = self.game.getBallSize() 
         circle = Circle(p, size)
-        
-        circle.setFill(player.color)
-        circle.setOutline(player.color)
+        circle.setFill(player.getColor())
+        circle.setOutline(player.getColor())
         circle.draw(self.win)
 
         while proj.isMoving():
@@ -83,41 +80,39 @@ class GameGraphics:
 
             update(50)
         
-        self.draw_projs[player.nr] = circle
-
+        self.draw_projs[player.getNumber()] = circle
         return proj
 
     def updateScore(self,playerNr):
         self.draw_scores[playerNr].undraw()
-        self.drawScore(playerNr)
+        self.draw_scores[playerNr] = self.drawScore(playerNr)
         
     ### Animerar en explosion (kallas vid träff av kanonen)
     def explode(self, other, player):
         target = other.getX()
         color = player.getColor()
-        radius = self.game.getBallSize()
+        diameter = self.game.getBallSize()
         maxExplosion = self.game.getCannonSize() * 2
 
-        while radius <= maxExplosion:
-            explCircle = Circle(Point(target, 0), radius)
+        while diameter <= maxExplosion:
+            explCircle = Circle(Point(target, 0), diameter)
             explCircle.setFill(color)
             explCircle.setOutline(color)
             explCircle.draw(self.win)
-            radius += 1
+            diameter += 1
 
             update(50)
             explCircle.undraw()
 
     ### En ny metod som skriver ett meddelande när en spelare vinner
     def congratulations(self, player):
-        
         win = GraphWin("Winner", 600, 400, True)
-        Text(Point(1,2), "Winner") ### Tror inte att denna syns i fönstret
-        Text(Point(250,200), f'Congratulations {player.getColor()} player!').draw(win).setFill(player.getColor())
+        #Text(Point(1,2), "Winner") ### Tror inte att denna syns i fönstret
+        congratText = Text(Point(250,200), f'Congratulations {player.getColor()} player!')
+        congratText.draw(win).setFill(player.getColor())
+        newGameText = Text(Point(250,250), 'Click to go to new game').draw(win)
+        newGameText.draw(win).setFill(player.getColor())
         win.getMouse()
-        self.game.newMatch() ### flytta till play
-        self.updateScore(0) 
-        self.updateScore(1)
         win.close()
         
         
@@ -152,11 +147,12 @@ class GameGraphics:
                 self.game.newRound()
 
 
-            ### leder till congratulations-method när en spelare vinner
-            if player.getScore() == 1:
+            ### Displays a message when a wincondition is met and then resets the game
+            if player.getScore() == 3:
                 self.congratulations(player)
-                ### sätt in newMatch etc här och undraw kanonkulan
-            
+                self.game.newGame()
+                self.updateScore(0) 
+                self.updateScore(1)
 
             self.game.nextPlayer()
 

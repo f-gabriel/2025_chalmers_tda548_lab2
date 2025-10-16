@@ -27,6 +27,7 @@ class GameGraphics:
         self.draw_cannons = [self.drawCanon(0), self.drawCanon(1)]
         self.draw_scores  = [self.drawScore(0), self.drawScore(1)]
         self.draw_projs   = [None, None] ### sparar de ritade projektilerna
+        self.draw_winCon  = self.drawWinCondition() ### Saves the win condition text.
 
     ### Ritar en kanon från punkt 1 till 2 (dvs p1 & p2) genom Rectangle-class och färgar den.
     def drawCanon(self,playerNr):
@@ -50,6 +51,13 @@ class GameGraphics:
         draw_score = Text(Point(x_pos, y_pos), msg)
         draw_score.draw(self.win)
         return draw_score
+    
+    ### Tells the player about the win condition is called from
+    def drawWinCondition(self):
+        draw_message = Text(Point(0, -5), 'Game is best of three')
+        draw_message.draw(self.win)
+        return (draw_message)
+
 
     ### Ritar/animerar kanonkulan
     def fire(self, angle, vel):
@@ -104,10 +112,9 @@ class GameGraphics:
             update(50)
             explCircle.undraw()
 
-    ### En ny metod som skriver ett meddelande när en spelare vinner
+    ### A new method that displays a message when a player wins the game.
     def congratulations(self, player):
         win = GraphWin("Winner", 600, 400, True)
-        #Text(Point(1,2), "Winner") ### Tror inte att denna syns i fönstret
         congratText = Text(Point(250,200), f'Congratulations {player.getColor()} player!')
         congratText.draw(win).setFill(player.getColor())
         newGameText = Text(Point(250,250), 'Click to go to new game').draw(win)
@@ -115,9 +122,6 @@ class GameGraphics:
         win.getMouse()
         win.close()
         
-        
-
-
     def play(self):
         while True:
             player = self.game.getCurrentPlayer()
@@ -132,13 +136,11 @@ class GameGraphics:
                 inp.close()
             elif inp.interact() == "Quit":
                 exit()
-            
 
             player = self.game.getCurrentPlayer()
             other = self.game.getOtherPlayer()
             proj = self.fire(angle, vel)
             distance = other.projectileDistance(proj)
-
             
             if distance == 0.0:
                 player.increaseScore()
@@ -146,9 +148,8 @@ class GameGraphics:
                 self.explode(other, player)
                 self.game.newRound()
 
-
             ### Displays a message when a wincondition is met and then resets the game
-            if player.getScore() == 3:
+            if player.getScore() >= 2:
                 self.congratulations(player)
                 self.game.newGame()
                 self.updateScore(0) 

@@ -2,7 +2,8 @@ from math import sin,cos,radians
 import random
 
 ### Döp om newMatch() till newGame()
-
+### är det ok att ha objekt.attribut, eller objekt.getAttributA.attribubtB, eller ska det vara objekt.getAttributA().getattribubtB()
+### fråga om getDistance()
 ### We've added Game.newMatch and Player.resetScore() for our own implimentation of a win-condition. 
 
 """ This is the model of the game"""
@@ -46,7 +47,7 @@ class Game:
     
     """ Switch active player """
     def nextPlayer(self):
-        self.currentPlayerNumber = self.getOtherPlayer().nr
+        self.currentPlayerNumber = self.getOtherPlayer().nr ### Se ovan: 
 
     """ Set the current wind speed, only used for testing """
     def setCurrentWind(self, wind):
@@ -82,7 +83,7 @@ class Player:
 
     """ Create and return a projectile starting at the centre of this players cannon. Replaces any previous projectile for this player. """
     def fire(self, angle, velocity):
-        self.angle = angle
+        self.angle = angle ### self.angle, self.velocity = angle, velocity
         self.velocity = velocity
         wind = self.game.getCurrentWind()
         yPos = self.game.getCannonSize() / 2
@@ -193,4 +194,5 @@ class Projectile:
     """ The current y-position (height) of the projectile". Should never be below 0. """
     def getY(self):
         return self.yPos
+
 

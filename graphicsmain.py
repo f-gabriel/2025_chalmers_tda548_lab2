@@ -30,23 +30,23 @@ class GameGraphics:
 
     ### Ritar en kanon från punkt 1 till 2 (dvs p1 & p2) genom Rectangle-class och färgar den.
     def drawCanon(self,playerNr):
-        x_pos = self.game.getPlayers()[playerNr].x_pos
+        x_pos = self.game.getPlayers()[playerNr].x_pos ### getX()
         size = self.game.getCannonSize()
         p1 = Point(x_pos - size / 2, size)
         p2 = Point(x_pos + size / 2, 0)
 
         
         draw_cannon = Rectangle(p1, p2)
-        draw_cannon.setFill(self.game.getPlayers()[playerNr].color)
-        draw_cannon.setOutline(self.game.getPlayers()[playerNr].color)
+        draw_cannon.setFill(self.game.getPlayers()[playerNr].color) ### getColor()
+        draw_cannon.setOutline(self.game.getPlayers()[playerNr].color) ### getColor()
         draw_cannon.draw(self.win)
        
         return draw_cannon
 
     ### skriver poängantalet under varje spelare
     def drawScore(self,playerNr):
-        msg = f'Score: {self.game.getPlayers()[playerNr].score}'
-        x_pos = self.game.getPlayers()[playerNr].x_pos
+        msg = f'Score: {self.game.getPlayers()[playerNr].score}'  ### getScore()
+        x_pos = self.game.getPlayers()[playerNr].x_pos  ### getColor()
         y_pos = -5  ### Ett godtyckligt tal (mellan botten av window och cannon)
         draw_score = Text(Point(x_pos, y_pos), msg)
 
